@@ -28,7 +28,6 @@
     <!-- Bootstrap navbar-->
 
      <!-- HTML provided in the following sections goes here. -->
-     <div class="container">
       <h1 align = "center">Event Hub Fake Data Generator</h1>
       <p>This simple web app uses Faker for random data generation. Learn more about <a href="">Faker</a>.
      </p>
@@ -36,7 +35,7 @@
 
      <!-- End -->
     
-    <form action="/submit"  method="post">
+    <form action="/submit" id="data-form" method="post">
         <div class="form-group">
             <label for="address">Event Hub Connection String</label>
             <input type="text" class="form-control" name ="connectionstring" value ="" aria-describedby="connectionstring" placeholder="">
@@ -44,54 +43,68 @@
             <input type="text" class="form-control" name="namespace" value ="fakerhub" aria-describedby="namespace" placeholder="">
             <label for="messages">Number of messages</label>
             <input type="text" class="form-control" name="messages" aria-describedby="messages" placeholder="" value="100">
+            <label for="interval">How often to send messages (in seconds)</label>
+            <input type="text" class="form-control" name="interval" aria-describedby="interval" placeholder="" value="10">
             <label for="fakedata">Fake Data Methods</label>
-            <textarea type="textarea" rows="15" class="form-control" name="method" aria-describedby="fakedata" placeholder="">{ 
-      "employee_id": { 
-          "type": "string",
-          "faker": {
-              "fake": "{{random.uuid}}"
-          }
-      },
-      "employee_name": {
-          "type": "string",
-          "faker": {
-              "fake": "{{name.firstName}} {{name.lastName}}"
-          }
-      },
-      "employee_country": {
-          "type": "string",
-          "faker": {
-              "fake": "{{address.country}}"
-          }
-      },
-      "email_address": {
-          "type": "string",
-          "faker": {
-              "fake": "{{internet.email}}"
-          }
-      },
-      "employee_age": {
-          "type": "integer",
-          "minimum": "18",
-          "maximum": "100"
-      },
-      "employee_department": {
-          "type": "string",
-          "faker": {
-              "random.arrayElement": [["IT", "Finance", "HR", "Marketing", "Sales"]]
-          }
-      },
-      "employee_salary": {
-        "type": "integer",
-        "minimum": "38000",
-        "maximum": "75000"
-    }
-  }
-            
+            <textarea type="textarea" rows="15" class="form-control" name="method" aria-describedby="fakedata" placeholder="">
+              {
+                "type": "object",
+                "properties": {
+                  "timestamp": {
+                      "type": "number",
+                      "faker": {
+                          "custom.pdt": [2]
+                      }
+                  },
+                  "product": {
+                      "type": "string",
+                      "faker": "commerce.product"
+                  },
+                  "adj": {
+                      "type": "string",
+                      "faker": "commerce.productAdjective"
+                  },
+                  "material": {
+                      "type": "string",
+                      "faker": "commerce.productMaterial"
+                  },
+                  "price": {
+                      "type": "number",
+                      "faker": "finance.amount"
+                  },
+                  "store_location": {
+                      "type": "string",
+                      "pattern": "STORE\\d{2}"
+                  },
+                  "invoice_id": {
+                      "type": "string",
+                      "pattern": "INV-\\d{4}"
+                  }
+                },
+                "required": [
+                    "timestamp",
+                    "product",
+                    "adj",
+                    "material",
+                    "price",
+                    "store_location",
+                    "invoice_id"
+                ],
+                "definitions": {
+                  "positiveInt": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "exclusiveMinimum": true
+                  }
+                }
+              }
             </textarea>
             <small id="emailHelp" class="form-text text-muted">Connection details can be found on the Azure Portal. List of Faker methods can be found: https://github.com/Marak/faker.js/wiki</small>
         </div>
+        <label for="test">Test mode?</label><input type="checkbox" name="test" checked>
+        <br />
         <button type="submit" class="btn btn-primary">Submit</button>
+        <button id="btn-stop" class="btn btn-secondary">Stop</button>
     </form>
      <!-- End -->
     </div>
@@ -101,6 +114,27 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-    <script type = "text/javascript" src ="static/scripts/mainn.js"></script>
+    <script type = "text/javascript">
+      $(function(){
+        $("#data-form").submit(function(e) {
+          e.preventDefault();
+          var form = $(this);
+          var actionUrl = form.attr('action');
+          $.ajax({
+            type: "POST",
+            url: actionUrl,
+            data: form.serialize(),
+          });
+        });
+        $("#btn-stop").click(function(e) {
+          e.preventDefault();
+          $.ajax({
+            type: "POST",
+            url: "/stop",
+            data: {},
+          });
+        });
+      });
+    </script>
   </body>
 </html>

@@ -4,6 +4,7 @@
   "description": "A faker app to pass data across to Azure",
   "main": "index.js",
   "scripts": {
+    "start": "node --experimental-worker index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Jalal Uddin",
@@ -13,7 +14,7 @@
     "body-parser": "^1.19.0",
     "ejs": "^3.0.1",
     "express": "^4.17.1",
-    "faker": "^4.1.0",
+    "@faker-js/faker": "^4.1.0",
     "json-schema-faker": "^0.5.0-rc23"
   }
 }
